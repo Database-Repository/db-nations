@@ -12,9 +12,9 @@ public class Main {
         String user = "root";
         String password = "root";
 
-        try (Connection connection = DriverManager.getConnection(url, user, password)){
+        try (Connection connection = DriverManager.getConnection(url, user, password)) {
 
-            System.out.print("Name of country: ");
+            System.out.print("Search one country: ");
             String searchString = scanner.nextLine();
 
             String query =
@@ -30,11 +30,11 @@ public class Main {
                 preparedStatement.setString(1, '%' + searchString + '%');
 
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                    while (resultSet.next()){
-                       int countryId        = resultSet.getInt("country_id");
-                       String countryName   = resultSet.getString("c.name");
-                       String regionName    = resultSet.getString("r.name");
-                       String continentName = resultSet.getString("c2.name");
+                    while (resultSet.next()) {
+                        int countryId = resultSet.getInt("country_id");
+                        String countryName = resultSet.getString("c.name");
+                        String regionName = resultSet.getString("r.name");
+                        String continentName = resultSet.getString("c2.name");
 
                         System.out.println(countryId + " || " + countryName + " || " + regionName + " || " + continentName);
                     }
@@ -42,12 +42,40 @@ public class Main {
                     System.out.println("Unable to execute query");
                     e.printStackTrace();
                 }
+            } catch (SQLException e) {
+                System.out.println("Unable to prepare statement");
+                e.printStackTrace();
+            }
+
+            String query2 =
+                    "SELECT * FROM countries c "
+                    +"JOIN country_languages cl ON c.country_id  = cl.country_id "
+                    +"JOIN languages l ON cl.language_id = l.language_id "
+                    + "WHERE cl.country_id = 107 "
+                    + "ORDER BY c.name ";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query2)) {
+
+                try (ResultSet resultSet2 = preparedStatement.executeQuery()) {
+                    System.out.println("\n");
+                    while (resultSet2.next()) {
+                        int countryId = resultSet2.getInt("country_id");
+
+
+                        System.out.println(countryId);
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Unable to execute query");
+                    e.printStackTrace();
+                }
+            } catch (SQLException e) {
+                System.out.println("Unable to execute query");
+                e.printStackTrace();
             }
         } catch (SQLException e) {
-            System.out.println("Unable to prepare statement");
+            System.out.println("Unable to open connection");
             e.printStackTrace();
         }
-
         scanner.close();
     }
 
