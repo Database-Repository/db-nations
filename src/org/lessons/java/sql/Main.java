@@ -1,6 +1,8 @@
 package org.lessons.java.sql;
 
 import java.sql.*;
+import java.time.Year;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
@@ -47,29 +49,66 @@ public class Main {
                 e.printStackTrace();
             }
 
+            System.out.print("Choose a country id: ");
+            String searchString2 = scanner.nextLine();
+
             String query2 =
-                    "SELECT * FROM countries c "
+                    "SELECT c.country_id, c.name, l.language  FROM countries c "
                     +"JOIN country_languages cl ON c.country_id  = cl.country_id "
                     +"JOIN languages l ON cl.language_id = l.language_id "
-                    + "WHERE cl.country_id = 107 "
+                    + "WHERE c.country_id LIKE ? "
                     + "ORDER BY c.name ";
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(query2)) {
 
+                preparedStatement.setString(1, '%' + searchString2 + '%');
+
                 try (ResultSet resultSet2 = preparedStatement.executeQuery()) {
-                    System.out.println("\n");
-                    while (resultSet2.next()) {
-                        int countryId = resultSet2.getInt("country_id");
 
-
-                        System.out.println(countryId);
+                    if (resultSet2.next()){
+                        String countryName = resultSet2.getString("c.name");
+                        System.out.println("Details for country: " + countryName);
                     }
+                    ArrayList<String> languages = new ArrayList<>();
+                    while (resultSet2.next()) {
+                        languages.add(resultSet2.getString("language"));
+                    }
+                    System.out.print("Languages: " + languages);
+
                 } catch (SQLException e) {
                     System.out.println("Unable to execute query");
                     e.printStackTrace();
                 }
             } catch (SQLException e) {
-                System.out.println("Unable to execute query");
+                System.out.println("Unable to prepare statement");
+                e.printStackTrace();
+            }
+
+            String query3 = "SELECT * FROM country_stats cs "
+                            + "WHERE cs.country_id LIKE ? "
+                            + "ORDER BY cs.year DESC LIMIT 1 ";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query3)) {
+
+                preparedStatement.setString(1, '%' + searchString2 + '%');
+
+                try (ResultSet resultSet3 = preparedStatement.executeQuery()) {
+                    System.out.println("\n" + "Most recent stats");
+                    while (resultSet3.next()) {
+                        String countryYear = resultSet3.getString("cs.year");
+                        String countryPopulation = resultSet3.getString("cs.population");
+                        String countryGdp= resultSet3.getString("cs.gdp");
+                        System.out.println("Year: " + countryYear);
+                        System.out.println("Population: " + countryPopulation);
+                        System.out.println("GDP: " + countryGdp);
+                    }
+
+                } catch (SQLException e) {
+                    System.out.println("Unable to execute query");
+                    e.printStackTrace();
+                }
+            } catch (SQLException e) {
+                System.out.println("Unable to prepare statement");
                 e.printStackTrace();
             }
         } catch (SQLException e) {
