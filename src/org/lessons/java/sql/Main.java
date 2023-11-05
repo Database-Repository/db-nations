@@ -18,6 +18,7 @@ public class Main {
 
             System.out.print("Search one country: ");
             String searchString = scanner.nextLine();
+            System.out.printf("%-5s %-15s %-25s%n", "ID", "COUNTRY", "REGION", "CONTINENT");
 
             String query =
                     "SELECT  c.country_id, c.name, r.name, c2.name "
@@ -38,7 +39,7 @@ public class Main {
                         String regionName = resultSet.getString("r.name");
                         String continentName = resultSet.getString("c2.name");
 
-                        System.out.println(countryId + " || " + countryName + " || " + regionName + " || " + continentName);
+                        System.out.printf("%-5s %-15s %-25s%n", countryId, countryName, regionName, continentName);
                     }
                 } catch (SQLException e) {
                     System.out.println("Unable to execute query");
@@ -67,6 +68,7 @@ public class Main {
 
                     if (resultSet2.next()){
                         String countryName = resultSet2.getString("c.name");
+                        System.out.println();
                         System.out.println("Details for country: " + countryName);
                     }
                     ArrayList<String> languages = new ArrayList<>();
